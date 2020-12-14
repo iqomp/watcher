@@ -1,0 +1,30 @@
+{
+    "name": "iqomp/watcher",
+    "description": "A composer plugin to run cli script when it detect some file changes",
+    "type": "composer-plugin",
+    "license": "MIT",
+    "version": "1.0.0",
+    "authors": [
+        {
+            "name": "Iqbal Fauzi",
+            "email": "iqbalfawz@gmail.com"
+        }
+    ],
+    "require": {
+        "composer-plugin-api": "^2.0"
+    },
+    "extra": {
+        "class": "Iqomp\\Watcher\\Plugin"
+    },
+    "autoload": {
+        "psr-4": {
+            "Iqomp\\Watcher\\": "src/"
+        }
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "3.*"
+    },
+    "scripts": {
+        "lint": "./vendor/bin/phpcs --standard=PSR12 src"
+    }
+}
