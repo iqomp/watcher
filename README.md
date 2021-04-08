@@ -17,9 +17,10 @@ This module add new composer command named `watch` that will watch for file chan
 on current directory recursively, and run the provided argument as a script.
 
 ```bash
-composer watch "php index.php start"
+composer watch "php index.php start" --ignore="runtime" --ignore="cache"
 ```
 
 Above script will run `php index.php start` on the first run, and watch for file
-changes in current directory. When file changes found, the previous script process
-is killed and new process is executed.
+changes in current directory while ignoring directory `runtime` and `cache`
+relative to current directory. When file changes found, the previous script
+process is killed and new process is executed.

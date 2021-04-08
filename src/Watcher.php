@@ -3,7 +3,7 @@
 /**
  * Content watcher
  * @package iqomp/watcher
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 namespace Iqomp\Watcher;
@@ -11,6 +11,7 @@ namespace Iqomp\Watcher;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Composer\Command\BaseCommand;
 
 class Watcher extends BaseCommand
@@ -18,6 +19,7 @@ class Watcher extends BaseCommand
     protected $script;
     protected $runner;
     protected $files = [];
+    protected $ignores = [];
 
     protected function compareFiles(): ?string
     {
@@ -70,6 +72,10 @@ class Watcher extends BaseCommand
             $file_abs = $base . '/' . $file;
             $file_rel = $path . '/' . $file;
 
+            if (in_array($file_abs, $this->ignores)) {
+                continue;
+            }
+
             if (is_dir($file_abs)) {
                 $files = $this->scanFiles($file_abs, $file_rel);
                 $result = array_merge($result, $files);
@@ -117,12 +123,32 @@ class Watcher extends BaseCommand
                 'script',
                 InputArgument::REQUIRED,
                 'What script do you want to run?'
+            )
+            ->addOption(
+                'ignore',
+                'i',
+                InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL,
+                'Ignore file/directory relative to current directory'
             );
     }
 
     protected function execute(InputInterface $in, OutputInterface $out)
     {
         $this->script = $in->getArgument('script');
+
+        $ignores = $in->getOption('ignore');
+        if ($ignores) {
+            foreach ($ignores as $ignore) {
+                $ignore = ltrim($ignore, '/');
+                $ignore = getcwd() . '/' . $ignore;
+                $ignore = realpath($ignore);
+
+                if ($ignore) {
+                    $this->ignores[] = $ignore;
+                }
+            }
+        }
+
         $out->writeln('Watching current directory for file changes');
 
         while (true) {
