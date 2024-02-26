@@ -3,7 +3,7 @@
 /**
  * Content watcher
  * @package iqomp/watcher
- * @version 1.1.0
+ * @version 1.1.1
  */
 
 namespace Iqomp\Watcher;
@@ -57,10 +57,10 @@ class Watcher extends BaseCommand
         return $result;
     }
 
-    protected function restartScript(): void
+    protected function restartScript(OutputInterface $out): void
     {
-        $this->stopScript();
-        $this->startScript();
+        $this->stopScript($out);
+        $this->startScript($out);
     }
 
     protected function scanFiles(string $base, string $path): array
@@ -88,16 +88,20 @@ class Watcher extends BaseCommand
         return $result;
     }
 
-    protected function startScript(): void
+    protected function startScript(OutputInterface $out): void
     {
         $proc_cwd  = getcwd();
         $proc_desc = [STDIN, STDOUT, STDOUT];
         $proc_cmd  = $this->script;
 
         $this->runner = proc_open($proc_cmd, $proc_desc, $pipes, $proc_cwd);
+        $info = proc_get_status($this->runner);
+        $pid  = $info['pid'];
+
+        $out->writeln('Script started PID: ' . $pid);
     }
 
-    protected function stopScript(): void
+    protected function stopScript(OutputInterface $out): void
     {
         if (!$this->runner) {
             return;
@@ -107,7 +111,9 @@ class Watcher extends BaseCommand
 
         if ($info['running']) {
             $pid  = $info['pid'];
-            exec('kill ' . $pid);
+
+            $out->writeln('Killing process PID: ' . $pid);
+            exec('pkill -P ' . $pid);
         }
 
         proc_close($this->runner);
@@ -156,7 +162,7 @@ class Watcher extends BaseCommand
             if ($diff) {
                 $msg = '[' . date('H:i:s') . '] ';
                 $out->writeln($msg . $diff);
-                $this->restartScript();
+                $this->restartScript($out);
             }
             sleep(1);
         }

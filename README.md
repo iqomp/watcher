@@ -23,4 +23,4 @@ composer watch "php index.php start" --ignore="runtime" --ignore="cache"
 Above script will run `php index.php start` on the first run, and watch for file
 changes in current directory while ignoring directory `runtime` and `cache`
 relative to current directory. When file changes found, the previous script
-process is killed and new process is executed.
+process get killed and new process is executed.
