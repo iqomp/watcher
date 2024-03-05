@@ -3,7 +3,7 @@
     "description": "A composer plugin to run cli script when it detect some file changes",
     "type": "composer-plugin",
     "license": "MIT",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "authors": [
         {
             "name": "Iqbal Fauzi",

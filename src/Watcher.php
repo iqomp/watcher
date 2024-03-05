@@ -3,7 +3,7 @@
 /**
  * Content watcher
  * @package iqomp/watcher
- * @version 1.1.1
+ * @version 1.1.2
  */
 
 namespace Iqomp\Watcher;
@@ -57,6 +57,22 @@ class Watcher extends BaseCommand
         return $result;
     }
 
+    protected function killPID($pid): void
+    {
+        $pids = preg_split('/\s+/', `ps -o pid --no-heading --ppid $pid`);
+        foreach ($pids as $spid) {
+            $spid = trim($spid);
+            if (!$spid) {
+                continue;
+            }
+
+            posix_kill($spid, 9);
+            // $this->killPID($spid);
+        }
+
+        exec('pkill -P ' . $pid);
+    }
+
     protected function restartScript(OutputInterface $out): void
     {
         $this->stopScript($out);
@@ -91,7 +107,7 @@ class Watcher extends BaseCommand
     protected function startScript(OutputInterface $out): void
     {
         $proc_cwd  = getcwd();
-        $proc_desc = [STDIN, STDOUT, STDOUT];
+        $proc_desc = [STDIN, ['pipe','w'], STDERR];
         $proc_cmd  = $this->script;
 
         $this->runner = proc_open($proc_cmd, $proc_desc, $pipes, $proc_cwd);
@@ -113,9 +129,10 @@ class Watcher extends BaseCommand
             $pid  = $info['pid'];
 
             $out->writeln('Killing process PID: ' . $pid);
-            exec('pkill -P ' . $pid);
+            $this->killPID($pid);
         }
 
+        proc_terminate($this->runner, 2);
         proc_close($this->runner);
 
         $this->runner = null;
