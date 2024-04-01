@@ -107,7 +107,7 @@ class Watcher extends BaseCommand
     protected function startScript(OutputInterface $out): void
     {
         $proc_cwd  = getcwd();
-        $proc_desc = [STDIN, ['pipe','w'], STDERR];
+        $proc_desc = [STDIN, STDOUT, STDERR];
         $proc_cmd  = $this->script;
 
         $this->runner = proc_open($proc_cmd, $proc_desc, $pipes, $proc_cwd);
